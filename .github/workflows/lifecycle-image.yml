@@ -6,7 +6,7 @@ on:
       - published
 
 jobs:
-  build-lifecycle-image:
+  build-linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -16,12 +16,54 @@ jobs:
           echo ::set-output name=LIFECYCLE_VERSION::`echo ${{ github.event.release.tag_name }} | cut -d "v" -f2`
           echo ::set-output name=BUILDPACK_API::`cat Makefile | grep BUILDPACK_API?= | cut -d "=" -f2`
           echo ::set-output name=PLATFORM_API::`cat Makefile | grep PLATFORM_API?= | cut -d "=" -f2`
-      - name: Publish to Registry
-        uses: elgohr/Publish-Docker-Github-Action@master
+      - name: Build and push Linux
+        uses: docker/build-push-action@v1
         with:
-          name: buildpacksio/lifecycle
+          repository: buildpacksio/lifecycle
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           dockerfile: .github/workflows/lifecycle-image/Dockerfile
-          buildargs: LIFECYCLE_URI=https://github.com/buildpacks/lifecycle/releases/download/v${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }}/lifecycle-v${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }}+linux.x86-64.tgz,LIFECYCLE_VERSION=${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }},BUILDPACK_API=${{ steps.get_metadata.outputs.BUILDPACK_API }},PLATFORM_API=${{ steps.get_metadata.outputs.PLATFORM_API }}
-          tags: "latest,${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }}"
+          build_args: LIFECYCLE_URI=https://github.com/buildpacks/lifecycle/releases/download/v${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }}/lifecycle-v${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }}+linux.x86-64.tgz,LIFECYCLE_VERSION=${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }},BUILDPACK_API=${{ steps.get_metadata.outputs.BUILDPACK_API }},PLATFORM_API=${{ steps.get_metadata.outputs.PLATFORM_API }}
+          tags: "${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }}-linux"
+  build-windows:
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@master
+      - name: Get metadata
+        id: get_metadata
+        run: |
+          echo ::set-output name=LIFECYCLE_VERSION::`echo ${{ github.event.release.tag_name }} | cut -d "v" -f2`
+          echo ::set-output name=BUILDPACK_API::`cat Makefile | grep BUILDPACK_API?= | cut -d "=" -f2`
+          echo ::set-output name=PLATFORM_API::`cat Makefile | grep PLATFORM_API?= | cut -d "=" -f2`
+      - name: Build and push Windows
+        uses: mr-smithers-excellent/docker-build-push@v3
+        with:
+          image: buildpacksio/lifecycle
+          registry: docker.io
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          dockerfile: .github/workflows/lifecycle-image/Dockerfile
+          buildArgs: LIFECYCLE_URI=https://github.com/buildpacks/lifecycle/releases/download/v${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }}/lifecycle-v${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }}+linux.x86-64.tgz,LIFECYCLE_VERSION=${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }},BUILDPACK_API=${{ steps.get_metadata.outputs.BUILDPACK_API }},PLATFORM_API=${{ steps.get_metadata.outputs.PLATFORM_API }}
+          tag: "${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }}-windows"
+  create-manifest-list:
+    needs:
+      - build-linux
+      - build-windows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Get metadata
+        id: get_metadata
+        run: |
+          echo ::set-output name=LIFECYCLE_VERSION::`echo ${{ github.event.release.tag_name }} | cut -d "v" -f2`
+      - name: Create manifest list
+        run: |
+          docker manifest create buildpacksio/lifecycle:${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }} \
+            buildpacksio/lifecycle:${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }}-linux \
+            buildpacksio/lifecycle:${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }}-windows \
+          docker manifest create buildpacksio/lifecycle:latest \
+            buildpacksio/lifecycle:${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }}-linux \
+            buildpacksio/lifecycle:${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }}-windows \
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker push buildpacksio/lifecycle:${{ steps.get_metadata.outputs.LIFECYCLE_VERSION }}
+          docker push buildpacksio/lifecycle:latest
