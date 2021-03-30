@@ -161,7 +161,7 @@ func (m *processMap) add(listToAdd []launch.Process) string {
 		} else if procToAdd.Type == m.defaultType {
 			// non-default process overrides a default process
 			m.defaultType = ""
-			warning = fmt.Sprintf("Warning: redefining the following default process type with a process not marked as default: %s\n", procToAdd.Type)
+			warning = fmt.Sprintf("redefining the following default process type with a process not marked as default: %s\n", procToAdd.Type)
 		}
 		m.typeToProcess[procToAdd.Type] = procToAdd
 	}

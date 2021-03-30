@@ -325,7 +325,7 @@ func overrideDefaultForOldBuildpacks(processes []launch.Process, bpAPI string, l
 		processes[i].Default = false
 	}
 	if len(replacedDefaults) > 0 {
-		logger.Warn(fmt.Sprintf("Warning: default processes aren't supported in this buildpack api version. Overriding the default value to false for the following processes: [%s]", strings.Join(replacedDefaults, ", ")))
+		logger.Warn(fmt.Sprintf("default processes aren't supported in this buildpack api version. Overriding the default value to false for the following processes: [%s]", strings.Join(replacedDefaults, ", ")))
 	}
 	return nil
 }

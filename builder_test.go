@@ -500,7 +500,7 @@ func testBuilder(t *testing.T, when spec.G, it spec.S) {
 								t.Fatalf("Unexpected:\n%s\n", s)
 							}
 
-							expected := "Warning: redefining the following default process type with a process not marked as default: override-type"
+							expected := "redefining the following default process type with a process not marked as default: override-type"
 							assertLogEntry(t, logHandler, expected)
 
 							h.AssertEq(t, metadata.BuildpackDefaultProcessType, "")

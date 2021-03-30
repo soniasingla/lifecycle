@@ -357,7 +357,7 @@ func parseOptionalAnalyzedMD(logger lifecycle.Logger, path string) (platform.Ana
 	_, err := toml.DecodeFile(path, &analyzedMD)
 	if err != nil {
 		if os.IsNotExist(err) {
-			logger.Warnf("Warning: analyzed TOML file not found at '%s'", path)
+			logger.Warnf("analyzed TOML file not found at '%s'", path)
 			return platform.AnalyzedMetadata{}, nil
 		}
 

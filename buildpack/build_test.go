@@ -890,7 +890,7 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 				}); s != "" {
 					t.Fatalf("Unexpected metadata:\n%s\n", s)
 				}
-				expected := "Warning: default processes aren't supported in this buildpack api version. Overriding the default value to false for the following processes: [type-with-default]"
+				expected := "default processes aren't supported in this buildpack api version. Overriding the default value to false for the following processes: [type-with-default]"
 				assertLogEntry(t, logHandler, expected)
 			})
 

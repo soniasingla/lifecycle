@@ -99,7 +99,7 @@ func (b *Descriptor) Detect(config *DetectConfig) DetectRun {
 	}
 	if api.MustParse(b.API).Compare(api.MustParse("0.3")) >= 0 {
 		if t.hasTopLevelVersions() || t.Or.hasTopLevelVersions() {
-			config.Logger.Warnf(`Warning: buildpack %s has a "version" key. This key is deprecated in build plan requirements in buildpack API 0.3. "metadata.version" should be used instead`, b.Buildpack.ID)
+			config.Logger.Warnf(`buildpack %s has a "version" key. This key is deprecated in build plan requirements in buildpack API 0.3. "metadata.version" should be used instead`, b.Buildpack.ID)
 		}
 	}
 	t.Output = out.Bytes()

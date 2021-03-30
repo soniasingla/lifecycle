@@ -159,7 +159,7 @@ func testDetect(t *testing.T, when spec.G, it spec.S) {
 				t.Fatalf("Unexpected error:\n%s\n", err)
 			}
 			if s := h.AllLogs(logHandler); !strings.Contains(s,
-				`Warning: buildpack A has a "version" key. This key is deprecated in build plan requirements in buildpack API 0.3. "metadata.version" should be used instead`,
+				`buildpack A has a "version" key. This key is deprecated in build plan requirements in buildpack API 0.3. "metadata.version" should be used instead`,
 			) {
 				t.Fatalf("Expected log to contain warning:\n%s\n", s)
 			}
@@ -179,7 +179,7 @@ func testDetect(t *testing.T, when spec.G, it spec.S) {
 				t.Fatalf("Unexpected error:\n%s\n", err)
 			}
 			if s := h.AllLogs(logHandler); !strings.Contains(s,
-				`Warning: buildpack A has a "version" key. This key is deprecated in build plan requirements in buildpack API 0.3. "metadata.version" should be used instead`,
+				`buildpack A has a "version" key. This key is deprecated in build plan requirements in buildpack API 0.3. "metadata.version" should be used instead`,
 			) {
 				t.Fatalf("Expected log to contain warning:\n%s\n", s)
 			}
