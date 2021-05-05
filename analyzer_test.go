@@ -97,21 +97,20 @@ func testAnalyzerBuilder(platformAPI string) func(t *testing.T, when spec.G, it 
 
 		when("#Analyze", func() {
 			var (
-				expectedAppMetadata          platform.LayersMetadata
-				expectedCacheMetadata        platform.CacheMetadata
-				ref                          *testmock.MockReference
-				metadataRestorerExpectations func()
+				expectedAppMetadata   platform.LayersMetadata
+				expectedCacheMetadata platform.CacheMetadata
+				ref                   *testmock.MockReference
 			)
+
+			metadataRestorerExpectations := func() {
+				if api.MustParse(analyzer.Platform.API()).Compare(api.MustParse("0.7")) < 0 {
+					metadataRestorer.EXPECT().Restore(analyzer.Buildpacks, expectedAppMetadata, expectedCacheMetadata)
+				}
+			}
 
 			it.Before(func() {
 				ref = testmock.NewMockReference(mockCtrl)
 				ref.EXPECT().Name().AnyTimes()
-
-				metadataRestorerExpectations = func() {
-					if api.MustParse(analyzer.Platform.API()).Compare(api.MustParse("0.7")) < 0 {
-						metadataRestorer.EXPECT().Restore(analyzer.Buildpacks, expectedAppMetadata, expectedCacheMetadata)
-					}
-				}
 			})
 
 			when("image exists", func() {
